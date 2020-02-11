@@ -1856,11 +1856,11 @@ static AVStream *icv_add_video_stream_FFMPEG(AVFormatContext *oc,
           av_opt_set(c->priv_data,"crf","23", 0);
     }
     else if (c->codec_id == AV_CODEC_ID_HEVC){
-        c->gop_size = -1;
-        c->qmin = -1;
-        c->bit_rate = 0;
+//        c->gop_size = -1;
+//        c->qmin = -1;
+//        c->bit_rate = 0;
         if (c->priv_data){
-            av_opt_set(c->priv_data,"crf","27", 0);
+            av_opt_set(c->priv_data,"crf","23", 0);
             // x265
 //           av_opt_set(c->priv_data,"preset","ultrafast", 0);
 
