@@ -338,6 +338,11 @@ static int get_number_of_cpus(void)
 #endif
 }
 
+static bool param_VIDEOWRITER_SVT_DEBUG = utils::getConfigurationParameterBool("SVT_DEBUG", false);
+static int param_VIDEOWRITER_SVT_PRESET = (int)utils::getConfigurationParameterSizeT("SVT_PRESET", 9); // Default in SVT-HEVC is 7
+static int param_VIDEOWRITER_SVT_QP = (int)utils::getConfigurationParameterSizeT("SVT_QP", 32);
+
+
 
 struct Image_FFMPEG
 {
@@ -1860,12 +1865,28 @@ static AVStream *icv_add_video_stream_FFMPEG(AVFormatContext *oc,
 //        c->qmin = -1;
 //        c->bit_rate = 0;
         if (c->priv_data){
-            av_opt_set(c->priv_data,"crf","23", 0);
+//            av_opt_set(c->priv_data,"crf","23", 0);
             // x265
 //           av_opt_set(c->priv_data,"preset","ultrafast", 0);
 
             // SVT-HEVC
-            av_opt_set(c->priv_data,"preset","9", 0);
+            if(param_VIDEOWRITER_SVT_DEBUG){
+                CV_LOG_INFO(NULL, "Setting SVT-HEVC parameters");
+                char preset_value[32];
+                sprintf(preset_value, "%d", param_VIDEOWRITER_SVT_PRESET);
+                char svt_preset[64] = "SVT-HEVC PRESET: ";
+                strcat(svt_preset, preset_value);
+                CV_LOG_INFO(NULL, svt_preset);
+
+                char qp_value[32];
+                sprintf(qp_value, "%d", param_VIDEOWRITER_SVT_QP);
+                char svt_qp[64] = "SVT-HEVC QP: ";
+                strcat(svt_qp, qp_value);
+                CV_LOG_INFO(NULL, svt_qp);
+            }
+//            av_opt_set(c->priv_data,"preset","9", 0);
+            av_opt_set_int(c->priv_data,"preset",param_VIDEOWRITER_SVT_PRESET, 0);
+            av_opt_set_int(c->priv_data,"qp",param_VIDEOWRITER_SVT_QP, 0);
         }
     }
 #endif
