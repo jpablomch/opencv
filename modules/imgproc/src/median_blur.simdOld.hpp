@@ -719,11 +719,8 @@ medianBlur_SortNet( const Mat& _src, Mat& _dst, int m )
         }
 
         size.width *= cn;
-        T* dst0 = _dst.ptr<T>();
-//#pragma omp parallel for
-        for( i = 0; i < size.height; i++/*, dst += dstep*/ )
+        for( i = 0; i < size.height; i++, dst += dstep )
         {
-            T* dst = dst0 + dstep * i;
             const T* row0 = src + std::max(i - 1, 0)*sstep;
             const T* row1 = src + i*sstep;
             const T* row2 = src + std::min(i + 1, size.height-1)*sstep;
@@ -808,12 +805,9 @@ medianBlur_SortNet( const Mat& _src, Mat& _dst, int m )
             return;
         }
 
-        T* dst0 = _dst.ptr<T>();
         size.width *= cn;
-#pragma omp parallel for schedule(static)
-        for( int i = 0; i < size.height; i++/*, dst += dstep*/ )
+        for( i = 0; i < size.height; i++, dst += dstep )
         {
-            T* dst = dst0 + i * dstep;
             const T* row[5];
             row[0] = src + std::max(i - 2, 0)*sstep;
             row[1] = src + std::max(i - 1, 0)*sstep;
@@ -822,7 +816,7 @@ medianBlur_SortNet( const Mat& _src, Mat& _dst, int m )
             row[4] = src + std::min(i + 2, size.height-1)*sstep;
             int limit = cn*2;
 
-            for(int j = 0;; )
+            for(j = 0;; )
             {
                 for( ; j < limit; j++ )
                 {
@@ -831,7 +825,7 @@ medianBlur_SortNet( const Mat& _src, Mat& _dst, int m )
                     int j0 = j >= cn*2 ? j - cn*2 : j1;
                     int j3 = j < size.width - cn ? j + cn : j;
                     int j4 = j < size.width - cn*2 ? j + cn*2 : j3;
-                    for(int k = 0; k < 5; k++ )
+                    for( k = 0; k < 5; k++ )
                     {
                         const T* rowk = row[k];
                         p[k*5] = rowk[j0]; p[k*5+1] = rowk[j1];
@@ -872,7 +866,7 @@ medianBlur_SortNet( const Mat& _src, Mat& _dst, int m )
                 for( ; j <= size.width - VecOp::WSIZE - cn*2; j += VecOp::WSIZE )
                 {
                     WVT p[25];
-                    for(int k = 0; k < 5; k++ )
+                    for( k = 0; k < 5; k++ )
                     {
                         const T* rowk = row[k];
                         p[k*5] = vop.wload(rowk+j-cn*2); p[k*5+1] = vop.wload(rowk+j-cn);
@@ -909,7 +903,7 @@ medianBlur_SortNet( const Mat& _src, Mat& _dst, int m )
                 for( ; j <= size.width - VecOp::SIZE - cn*2; j += VecOp::SIZE )
                 {
                     VT p[25];
-                    for(int k = 0; k < 5; k++ )
+                    for( k = 0; k < 5; k++ )
                     {
                         const T* rowk = row[k];
                         p[k*5] = vop.load(rowk+j-cn*2); p[k*5+1] = vop.load(rowk+j-cn);
